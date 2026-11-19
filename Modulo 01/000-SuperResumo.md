@@ -56,6 +56,10 @@ Para sair:
 ```bash
 exit
 ```
+
+O nsenter é particularmente interessante para administração e investigação de incidentes em containers.
+
+
 ## Cgroups
 
 ### memory.events
@@ -91,6 +95,50 @@ Os principais contadores são:
 
 Esses indicadores são extremamente úteis para diagnosticar problemas em aplicações Kubernetes.
 
-exit
+## 6.2. OOM do container versus OOM do host
 
-O nsenter é particularmente interessante para administração e investigação de incidentes em containers.
+É importante não confundir dois cenários.
+
+**Cenário A — OOM do Cgroup**
+
+Um container ultrapassa seu limite de memória.
+
+O kernel tenta resolver a situação dentro do contexto do Cgroup.
+
+**Cenário B — OOM global do host**
+
+O próprio servidor fica sem memória disponível.
+
+Nesse caso, o OOM Killer pode precisar encerrar processos de diferentes serviços e containers para preservar o funcionamento do sistema.
+
+São situações diferentes, com impactos diferentes.
+
+Para investigar:
+
+```bash
+dmesg -T | grep -i -E 'oom|killed process'
+```
+
+Ou:
+
+```bash
+journalctl -k | grep -i -E 'oom|killed process'
+```
+
+Em ambientes Docker, você também pode verificar:
+
+```bash
+docker inspect \
+  --format '{{.State.OOMKilled}}' \
+  nome-do-container
+```
+
+Se retornar:
+
+```text
+true
+```
+
+O Docker registrou que o container foi encerrado por OOM.
+
+---
