@@ -1,4 +1,96 @@
-#Super resumo
+# Super resumo
 
-* `Namespaces` controlam a `visão` que um processo possui dos recursos do sistema,
-* `Cgroups` controlam `quanto desses recursos` um conjunto de processos pode consumir
+Os principais mecanismos são:
+
+| Mecanismo | Responsabilidade |
+|---|---|
+| Namespaces | Isolar a visão que um processo possui dos recursos do sistema |
+| Cgroups | Controlar e limitar o consumo de recursos |
+| Capabilities | Dividir os privilégios tradicionalmente associados ao root |
+| Seccomp | Filtrar chamadas de sistema |
+| AppArmor | Restringir o acesso a recursos por meio de perfis |
+| SELinux | Aplicar políticas de controle de acesso obrigatório |
+| LSM | Infraestrutura do kernel para implementar controles de segurança |
+
+## Namespaces
+
+
+* O isolamento depende da configuração.
+
+Opções como `--privileged`, `--pid=host`, `--network=host` e compartilhamento de diretórios do host podem enfraquecer significativamente o isolamento.
+
+```bash
+sudo apt install util-linux
+lsns -p "$PID"
+```
+
+O Linux disponibiliza o comando `nsenter`, que permite executar um processo dentro dos namespaces de outro processo.
+
+```bash
+sudo nsenter -t "$PID" -p -m -u -i -n sh
+```
+
+Aqui:
+
+| Parâmetro | Namespace |
+|---|---|
+| `-t` | Processo de destino |
+| `-p` | PID |
+| `-m` | MNT |
+| `-u` | UTS |
+| `-i` | IPC |
+| `-n` | NET |
+
+Você estará executando um shell utilizando os namespaces indicados do container.
+
+Verifique:
+
+```bash
+hostname
+ip addr
+lsns -p $$
+```
+
+Para sair:
+
+```bash
+exit
+```
+## Cgroups
+
+### memory.events
+
+Permite verificar eventos relacionados ao consumo de memória.
+
+Exemplo:
+
+```bash
+cat /sys/fs/cgroup/memory.events
+```
+
+Você poderá encontrar:
+
+```text
+low 0
+high 0
+max 0
+oom 0
+oom_kill 0
+oom_group_kill 0
+```
+
+Os principais contadores são:
+
+| Contador | Significado |
+|---|---|
+| high | Eventos de ultrapassagem de `memory.high` |
+| max | Situações em que o uso tentou ultrapassar `memory.max` |
+| oom | Situações em que o Cgroup entrou em condição de OOM |
+| oom_kill | Processos encerrados pelo OOM Killer |
+| oom_group_kill | Eventos de encerramento de grupos |
+
+Esses indicadores são extremamente úteis para diagnosticar problemas em aplicações Kubernetes.
+
+exit
+
+O nsenter é particularmente interessante para administração e investigação de incidentes em containers.
