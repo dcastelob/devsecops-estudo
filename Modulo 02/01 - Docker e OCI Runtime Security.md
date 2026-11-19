@@ -179,7 +179,7 @@ Ele é responsável por gerenciar o ciclo de vida dos containers e coordenar ope
 - Gerenciamento de processos.
 - Integração com runtimes OCI.
 
-É utilizado não apenas pelo Docker, mas também por ambientes Kubernetes.
+> É utilizado não apenas pelo Docker, mas também por ambientes Kubernetes.
 
 Por exemplo, em um cluster Kubernetes, o kubelet normalmente conversa com um runtime por meio da CRI (Container Runtime Interface).
 
